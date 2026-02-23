@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pulse — AI News Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --font-display:'DM Serif Display',Georgia,serif;
+  --font-body:'DM Sans',system-ui,sans-serif;
+  --bg:#F7F5F0;--bg-card:#FFFFFF;--bg-sidebar:#FDFCFA;
+  --bg-hover:#F0EDE8;--bg-input:#F0EDE8;
+  --text-primary:#1A1814;--text-secondary:#6B6560;
+  --text-tertiary:#A09B94;--text-inverse:#FFFFFF;
+  --border:#E8E4DE;--border-strong:#D4CFC8;
+  --accent:#D4622A;--accent-light:#FBF0EA;
+  --accent-green:#2A7D4F;--accent-green-light:#EAF4EE;
+  --accent-blue:#2A5D8F;--accent-blue-light:#EAF0F8;
+  --accent-amber:#B87C1A;--accent-amber-light:#FBF4E5;
+  --accent-purple:#6B3FA0;--accent-purple-light:#F2EDF9;
+  --shadow-sm:0 1px 3px rgba(26,24,20,.06);
+  --shadow-md:0 4px 16px rgba(26,24,20,.08);
+  --shadow-lg:0 12px 40px rgba(26,24,20,.12);
+  --shadow-card:0 2px 12px rgba(26,24,20,.07);
+  --radius-sm:8px;--radius-md:14px;--radius-lg:20px;--radius-xl:28px;
+  --sidebar-w:220px;--t:.2s cubic-bezier(.4,0,.2,1);
+}
+[data-theme="dark"]{
+  --bg:#111110;--bg-card:#1C1B19;--bg-sidebar:#161513;
+  --bg-hover:#232220;--bg-input:#232220;
+  --text-primary:#F0EDE8;--text-secondary:#8A8580;
+  --text-tertiary:#5A5550;--text-inverse:#111110;
+  --border:#2A2825;--border-strong:#3A3830;
+  --accent-light:#2A1810;--accent-green-light:#0E1E15;
+  --accent-blue-light:#0E1A26;--accent-amber-light:#1E1508;
+  --accent-purple-light:#180F28;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.3);
+  --shadow-md:0 4px 16px rgba(0,0,0,.4);
+  --shadow-lg:0 12px 40px rgba(0,0,0,.5);
+  --shadow-card:0 2px 12px rgba(0,0,0,.3);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;-webkit-font-smoothing:antialiased}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text-primary);min-height:100vh;transition:background var(--t),color var(--t);overflow-x:hidden}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+input,select,textarea{font-family:inherit}
+a{text-decoration:none;color:inherit}
+
+/* ── SHELL ── */
+.app{display:grid;grid-template-columns:var(--sidebar-w) 1fr;min-height:100vh}
+
+/* ── SIDEBAR ── */
+.sidebar{background:var(--bg-sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;padding:24px 16px;z-index:10}
+.logo{display:flex;align-items:center;gap:10px;padding:4px 8px;margin-bottom:32px}
+.logo-mark{width:32px;height:32px;background:var(--text-primary);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-mark svg{color:var(--bg)}
+.logo-text{font-family:var(--font-display);font-size:20px;letter-spacing:-.3px}
+.nav{flex:1;display:flex;flex-direction:column;gap:2px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius-sm);font-size:14px;font-weight:500;color:var(--text-secondary);transition:all var(--t);cursor:pointer}
+.nav-item:hover{background:var(--bg-hover);color:var(--text-primary)}
+.nav-item.active{background:var(--text-primary);color:var(--text-inverse)}
+.nav-item .ni{width:18px;height:18px;flex-shrink:0;opacity:.7}
+.nav-item.active .ni{opacity:1}
+.nav-badge{margin-left:auto;background:var(--accent);color:white;font-size:11px;font-weight:600;padding:2px 7px;border-radius:20px;min-width:20px;text-align:center}
+.nav-item.active .nav-badge{background:rgba(255,255,255,.25)}
+.nav-section{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--text-tertiary);padding:16px 12px 6px}
+.sidebar-bottom{padding-top:16px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px}
+.theme-toggle{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:var(--radius-sm);font-size:13px;color:var(--text-secondary);cursor:pointer;transition:all var(--t)}
+.theme-toggle:hover{background:var(--bg-hover);color:var(--text-primary)}
+.user-chip{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius-sm);cursor:pointer;transition:background var(--t)}
+.user-chip:hover{background:var(--bg-hover)}
+.avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--accent) 0%,#E8934A 100%);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:white;flex-shrink:0}
+.user-name{font-size:13px;font-weight:500}
+.user-sub{font-size:11px;color:var(--text-tertiary)}
+
+/* ── MAIN ── */
+.main{display:flex;flex-direction:column;min-height:100vh;overflow:hidden}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 32px;border-bottom:1px solid var(--border);background:var(--bg-sidebar);position:sticky;top:0;z-index:5}
+.topbar-title{font-family:var(--font-display);font-size:22px;letter-spacing:-.3px}
+.topbar-subtitle{font-size:13px;color:var(--text-secondary);margin-top:1px}
+.topbar-actions{display:flex;gap:8px;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;transition:all var(--t);cursor:pointer}
+.btn-ghost{color:var(--text-secondary);border:1px solid var(--border);background:var(--bg-card)}
+.btn-ghost:hover{background:var(--bg-hover);color:var(--text-primary);border-color:var(--border-strong)}
+.btn-primary{background:var(--text-primary);color:var(--text-inverse);border:1px solid transparent}
+.btn-primary:hover{opacity:.85}
+
+/* ── BANNER ── */
+.banner{padding:10px 32px;font-size:13px;display:flex;align-items:center;gap:8px;border-bottom:1px solid}
+.banner-warn{background:#FFF8E1;border-color:#FFD54F;color:#7D5A00}
+.banner-ok{background:#E8F5E9;border-color:#66BB6A;color:#1B5E20}
+.banner-err{background:#FFF0EE;border-color:#EF9A9A;color:#7F0000}
+.banner.hidden{display:none}
+.banner code{background:rgba(0,0,0,.08);padding:1px 6px;border-radius:3px;font-size:12px}
+.pulse-dot{width:7px;height:7px;border-radius:50%;background:currentColor;animation:pd 1.5s infinite;flex-shrink:0}
+@keyframes pd{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ── PAGES ── */
+.page{display:none;flex:1}
+.page.active{display:flex;flex-direction:column}
+
+/* ── SKELETON ── */
+.sk{background:linear-gradient(90deg,var(--border) 25%,var(--bg-hover) 50%,var(--border) 75%);background-size:200% 100%;animation:sk 1.4s infinite;border-radius:6px}
+@keyframes sk{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* ── FLASHCARD PAGE ── */
+.fc-view{flex:1;display:flex;flex-direction:column;align-items:center;padding:32px 24px 24px;gap:20px;overflow-y:auto}
+.prog-wrap{width:100%;max-width:680px;display:flex;align-items:center;gap:12px}
+.prog-track{flex:1;height:3px;background:var(--border);border-radius:99px;overflow:hidden}
+.prog-fill{height:100%;background:var(--accent);border-radius:99px;transition:width .4s ease}
+.prog-label{font-size:12px;color:var(--text-tertiary);white-space:nowrap;font-variant-numeric:tabular-nums}
+.fc-wrap{width:100%;max-width:680px}
+
+/* ── CARD ── */
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-xl);box-shadow:var(--shadow-lg);overflow:hidden;animation:ci .35s cubic-bezier(.34,1.2,.64,1)}
+@keyframes ci{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:none}}
+.card-head{padding:28px 32px 0;display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.card-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cat-tag{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:99px;font-size:11px;font-weight:600;letter-spacing:.3px}
+.t-ai{background:var(--accent-purple-light);color:var(--accent-purple)}
+.t-finance{background:var(--accent-amber-light);color:var(--accent-amber)}
+.t-technology,.t-tech{background:var(--accent-blue-light);color:var(--accent-blue)}
+.t-science{background:var(--accent-green-light);color:var(--accent-green)}
+.t-world,.t-general{background:var(--accent-light);color:var(--accent)}
+.time-ago{font-size:12px;color:var(--text-tertiary)}
+.src-label{font-size:12px;color:var(--text-tertiary);font-weight:500}
+.dot-sep{color:var(--text-tertiary)}
+.score-box{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.score-num{font-family:var(--font-display);font-size:28px;line-height:1;color:var(--accent)}
+.score-lbl{font-size:10px;color:var(--text-tertiary);letter-spacing:.5px;text-transform:uppercase}
+.score-dots{display:flex;gap:3px}
+.s-dot{width:6px;height:6px;border-radius:50%;background:var(--border)}
+.s-dot.on{background:var(--accent)}
+.card-body{padding:20px 32px 28px}
+.card-title{font-family:var(--font-display);font-size:23px;line-height:1.3;letter-spacing:-.3px;margin-bottom:20px}
+.sum-box{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px 20px;margin-bottom:16px}
+.sum-lbl{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:12px}
+.sum-lbl svg{color:var(--accent)}
+.bullets{list-style:none;display:flex;flex-direction:column;gap:8px}
+.bullet{display:flex;gap:10px;font-size:14px;line-height:1.5;color:var(--text-secondary)}
+.b-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);margin-top:7px;flex-shrink:0}
+.matters{background:linear-gradient(135deg,var(--accent-light) 0%,transparent 100%);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:4px}
+.matters-lbl{font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--accent);margin-bottom:6px}
+.matters-txt{font-size:14px;line-height:1.55}
+.card-actions{display:flex;align-items:center;gap:8px;padding:20px 32px 24px;border-top:1px solid var(--border)}
+.act-btn{display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:99px;font-size:13px;font-weight:500;border:1px solid var(--border);background:var(--bg-card);color:var(--text-secondary);transition:all var(--t);cursor:pointer}
+.act-btn:hover{border-color:var(--border-strong);color:var(--text-primary);background:var(--bg-hover)}
+.act-btn.like:hover{border-color:var(--accent-green);color:var(--accent-green);background:var(--accent-green-light)}
+.act-btn.dislike:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}
+.act-btn.save-btn:hover,.act-btn.save-btn.saved{border-color:var(--accent-blue);color:var(--accent-blue);background:var(--accent-blue-light)}
+.act-btn svg{width:15px;height:15px}
+.spacer{flex:1}
+.card-nav{display:flex;align-items:center;gap:12px;width:100%;max-width:680px}
+.nav-btn{display:flex;align-items:center;gap:8px;padding:12px 28px;border-radius:99px;font-size:14px;font-weight:500;border:1px solid var(--border);background:var(--bg-card);color:var(--text-secondary);transition:all var(--t);cursor:pointer;box-shadow:var(--shadow-sm)}
+.nav-btn:hover{border-color:var(--border-strong);color:var(--text-primary);box-shadow:var(--shadow-md)}
+.nav-btn.next{background:var(--text-primary);color:var(--text-inverse);border-color:transparent;flex:1;max-width:280px;justify-content:center}
+.nav-btn.next:hover{opacity:.85}
+.kb-hint{font-size:11px;color:var(--text-tertiary);display:flex;align-items:center;gap:8px}
+.kbd{display:inline-flex;align-items:center;justify-content:center;padding:2px 7px;border:1px solid var(--border-strong);border-radius:4px;font-size:10px;font-weight:600;color:var(--text-tertiary);background:var(--bg-hover);font-family:monospace}
+.done-state{display:none;flex-direction:column;align-items:center;text-align:center;padding:48px 20px;gap:16px;max-width:400px}
+.done-state.show{display:flex}
+.done-emoji{font-size:48px}
+.done-title{font-family:var(--font-display);font-size:26px;letter-spacing:-.3px}
+.done-sub{font-size:14px;color:var(--text-secondary);line-height:1.5}
+
+/* ── FEED PAGE ── */
+.feed-view{flex:1;display:flex;overflow:hidden}
+.feed-main{flex:1;padding:28px 32px;overflow-y:auto}
+.filters{display:flex;align-items:center;gap:8px;margin-bottom:24px;flex-wrap:wrap}
+.fchip{padding:6px 14px;border-radius:99px;font-size:13px;font-weight:500;border:1px solid var(--border);background:var(--bg-card);color:var(--text-secondary);cursor:pointer;transition:all var(--t)}
+.fchip:hover{border-color:var(--border-strong);color:var(--text-primary)}
+.fchip.active{background:var(--text-primary);color:var(--text-inverse);border-color:transparent}
+.feed-list{display:flex;flex-direction:column;gap:12px}
+.feed-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:20px 24px;display:grid;grid-template-columns:1fr auto;gap:16px;align-items:start;cursor:pointer;transition:all var(--t);box-shadow:var(--shadow-card);animation:fu .3s ease both}
+@keyframes fu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.feed-card:hover{border-color:var(--border-strong);box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.fc-rank{font-family:var(--font-display);font-size:13px;color:var(--text-tertiary);margin-bottom:6px}
+.fc-title{font-family:var(--font-display);font-size:17px;line-height:1.35;letter-spacing:-.2px;margin-bottom:8px}
+.fc-excerpt{font-size:13px;line-height:1.5;color:var(--text-secondary);margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.fc-footer{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.fc-score{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.sc-num{font-family:var(--font-display);font-size:24px;color:var(--accent);line-height:1}
+.sc-track{width:48px;height:4px;background:var(--border);border-radius:99px;overflow:hidden}
+.sc-fill{height:100%;background:var(--accent);border-radius:99px}
+.feed-sidebar{width:280px;border-left:1px solid var(--border);padding:28px 24px;overflow-y:auto;flex-shrink:0}
+.sw{margin-bottom:28px}
+.sw-title{font-size:12px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:14px}
+.topic-bar{display:flex;flex-direction:column;gap:8px}
+.t-row{display:flex;align-items:center;gap:8px}
+.t-lbl{font-size:12px;color:var(--text-secondary);width:80px}
+.t-track{flex:1;height:4px;background:var(--border);border-radius:99px;overflow:hidden}
+.t-fill{height:100%;border-radius:99px;background:var(--accent)}
+.t-count{font-size:11px;color:var(--text-tertiary);width:20px;text-align:right}
+
+/* ── SAVED ── */
+.saved-view{flex:1;padding:28px 32px;overflow-y:auto}
+.search-bar{display:flex;align-items:center;gap:10px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 16px;margin-bottom:24px;max-width:480px;transition:border-color var(--t)}
+.search-bar:focus-within{border-color:var(--border-strong)}
+.search-bar input{flex:1;border:none;outline:none;font-size:14px;background:transparent;color:var(--text-primary)}
+.search-bar input::placeholder{color:var(--text-tertiary)}
+.sec-title{font-size:12px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:12px;margin-top:24px}
+.saved-item{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px 20px;display:flex;gap:16px;align-items:start;margin-bottom:10px;cursor:pointer;transition:all var(--t);box-shadow:var(--shadow-card)}
+.saved-item:hover{border-color:var(--border-strong);box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.si-body{flex:1}
+.si-title{font-family:var(--font-display);font-size:15px;line-height:1.35;margin-bottom:6px}
+.si-meta{font-size:12px;color:var(--text-tertiary);display:flex;gap:10px;align-items:center}
+
+/* ── PROFILE ── */
+.profile-view{flex:1;padding:28px 32px;overflow-y:auto}
+.profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:840px}
+.pc{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:24px;box-shadow:var(--shadow-card)}
+.pc.full{grid-column:1/-1}
+.pc-title{font-size:12px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:18px}
+.fg{margin-bottom:16px}
+.fl{font-size:13px;font-weight:500;color:var(--text-secondary);margin-bottom:6px;display:block}
+.fi{width:100%;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;font-size:14px;color:var(--text-primary);outline:none;transition:border-color var(--t)}
+.fi:focus{border-color:var(--border-strong)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:6px 14px;border-radius:99px;font-size:13px;font-weight:500;border:1px solid var(--border);background:var(--bg);color:var(--text-secondary);cursor:pointer;transition:all var(--t)}
+.chip:hover{border-color:var(--border-strong);color:var(--text-primary)}
+.chip.on{background:var(--text-primary);color:var(--text-inverse);border-color:transparent}
+.tog-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)}
+.tog-row:last-child{border-bottom:none}
+.tog-info{flex:1}
+.tog-label{font-size:14px;font-weight:500;margin-bottom:2px}
+.tog-desc{font-size:12px;color:var(--text-tertiary)}
+.tog{width:36px;height:20px;background:var(--border);border-radius:99px;position:relative;cursor:pointer;transition:background var(--t)}
+.tog.on{background:var(--accent)}
+.tog::after{content:'';position:absolute;width:14px;height:14px;background:white;border-radius:50%;top:3px;left:3px;transition:transform var(--t);box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.tog.on::after{transform:translateX(16px)}
+.sl-wrap{padding:8px 0}
+.sl-lbl{display:flex;justify-content:space-between;font-size:12px;color:var(--text-tertiary);margin-bottom:6px}
+.sl{-webkit-appearance:none;width:100%;height:4px;background:var(--border);border-radius:99px;outline:none}
+.sl::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--text-primary);cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+
+/* ── MOBILE NAV ── */
+.mob-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--bg-sidebar);border-top:1px solid var(--border);padding:10px 0 max(10px,env(safe-area-inset-bottom));z-index:100}
+.mob-items{display:flex;justify-content:space-around}
+.mob-item{display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 16px;cursor:pointer;color:var(--text-tertiary);transition:color var(--t);font-size:11px}
+.mob-item.active{color:var(--text-primary)}
+.mob-item svg{width:22px;height:22px}
+
+/* ── EMPTY STATE ── */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;color:var(--text-tertiary);text-align:center;gap:12px}
+.empty-icon{font-size:40px}
+.empty h3{font-size:16px;font-weight:500;color:var(--text-secondary)}
+.empty p{font-size:13px;line-height:1.5;max-width:280px}
+
+@media(max-width:900px){
+  .app{grid-template-columns:1fr}
+  .sidebar{display:none}
+  .mob-nav{display:block}
+  .main{padding-bottom:70px}
+  .feed-sidebar{display:none}
+  .profile-grid{grid-template-columns:1fr}
+  .pc.full{grid-column:1}
+  .topbar{padding:14px 20px}
+  .fc-view{padding:20px 16px}
+  .card-body{padding:16px 20px 20px}
+  .card-head{padding:20px 20px 0}
+  .card-actions{padding:16px 20px 20px;flex-wrap:wrap}
+  .feed-main{padding:20px 16px}
+  .saved-view,.profile-view{padding:20px 16px}
+  .banner{padding:10px 20px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-mark">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <circle cx="8" cy="8" r="3" fill="currentColor"/>
+        <circle cx="8" cy="2" r="1.5" fill="currentColor" opacity=".6"/>
+        <circle cx="8" cy="14" r="1.5" fill="currentColor" opacity=".6"/>
+        <circle cx="2" cy="8" r="1.5" fill="currentColor" opacity=".6"/>
+        <circle cx="14" cy="8" r="1.5" fill="currentColor" opacity=".6"/>
+      </svg>
+    </div>
+    <span class="logo-text">Pulse</span>
+  </div>
+  <nav class="nav">
+    <div class="nav-section">Discover</div>
+    <div class="nav-item active" data-page="flashcard">
+      <svg class="ni" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="3" width="14" height="12" rx="2"/><line x1="5" y1="7" x2="13" y2="7"/><line x1="5" y1="10" x2="10" y2="10"/></svg>
+      Flashcards
+      <span class="nav-badge" id="badge-fc">—</span>
+    </div>
+    <div class="nav-item" data-page="feed">
+      <svg class="ni" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6"><line x1="3" y1="4" x2="15" y2="4"/><line x1="3" y1="8" x2="15" y2="8"/><line x1="3" y1="12" x2="11" y2="12"/></svg>
+      Feed
+    </div>
+    <div class="nav-section" style="margin-top:8px">Library</div>
+    <div class="nav-item" data-page="saved">
+      <svg class="ni" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 2h10a1 1 0 011 1v13l-5.5-3L4 16V3a1 1 0 011-1z"/></svg>
+      Saved
+      <span class="nav-badge" id="badge-saved" style="display:none">0</span>
+    </div>
+    <div class="nav-section" style="margin-top:8px">Account</div>
+    <div class="nav-item" data-page="profile">
+      <svg class="ni" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9" cy="6" r="3"/><path d="M3 15a6 6 0 0112 0"/></svg>
+      Profile
+    </div>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="theme-toggle" onclick="toggleTheme()">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="3"/><line x1="8" y1="1" x2="8" y2="3"/><line x1="8" y1="13" x2="8" y2="15"/><line x1="1" y1="8" x2="3" y2="8"/><line x1="13" y1="8" x2="15" y2="8"/></svg>
+      <span id="theme-lbl">Light mode</span>
+    </div>
+    <div class="user-chip">
+      <div class="avatar" id="u-avatar">?</div>
+      <div>
+        <div class="user-name" id="u-name">Set up profile</div>
+        <div class="user-sub" id="u-sub">Click Profile →</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- Backend banner -->
+  <div class="banner banner-warn" id="banner">
+    <div class="pulse-dot"></div>
+    <span id="banner-msg">Connecting to backend…</span>
+  </div>
+
+  <!-- ═══ FLASHCARD PAGE ═══ -->
+  <div class="page active" id="page-flashcard">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Today's Briefing</div>
+        <div class="topbar-subtitle" id="fc-sub">Loading articles…</div>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost" onclick="nav('feed')">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><line x1="1" y1="3" x2="13" y2="3"/><line x1="1" y1="7" x2="13" y2="7"/><line x1="1" y1="11" x2="9" y2="11"/></svg>
+          View all
+        </button>
+        <button class="btn btn-ghost" onclick="refreshAll()">↻ Refresh</button>
+      </div>
+    </div>
+    <div class="fc-view">
+      <div class="prog-wrap">
+        <div class="prog-track"><div class="prog-fill" id="prog" style="width:0%"></div></div>
+        <div class="prog-label" id="prog-lbl">—</div>
+      </div>
+      <div class="fc-wrap" id="fc-wrap">
+        <!-- Loading skeleton -->
+        <div id="fc-skeleton" style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-xl);padding:40px 32px;box-shadow:var(--shadow-lg)">
+          <div class="sk" style="height:14px;width:100px;margin-bottom:22px"></div>
+          <div class="sk" style="height:30px;width:92%;margin-bottom:10px"></div>
+          <div class="sk" style="height:30px;width:70%;margin-bottom:28px"></div>
+          <div class="sk" style="height:130px;border-radius:14px;margin-bottom:14px"></div>
+          <div class="sk" style="height:80px;border-radius:8px"></div>
+        </div>
+        <!-- Actual card (hidden until loaded) -->
+        <div id="fc-card" style="display:none">
+          <div class="card" id="the-card">
+            <div class="card-head">
+              <div class="card-meta">
+                <span class="cat-tag" id="c-cat"></span>
+                <span class="src-label" id="c-src"></span>
+                <span class="dot-sep">·</span>
+                <span class="time-ago" id="c-time"></span>
+              </div>
+              <div class="score-box">
+                <div class="score-num" id="c-score"></div>
+                <div class="score-lbl">Relevance</div>
+                <div class="score-dots" id="c-dots"></div>
+              </div>
+            </div>
+            <div class="card-body">
+              <h2 class="card-title" id="c-title"></h2>
+              <div class="sum-box">
+                <div class="sum-lbl">
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><circle cx="5" cy="5" r="5"/></svg>
+                  AI Summary
+                </div>
+                <ul class="bullets" id="c-bullets"></ul>
+              </div>
+              <div class="matters">
+                <div class="matters-lbl">🎯 Why this matters to you</div>
+                <div class="matters-txt" id="c-matters"></div>
+              </div>
+            </div>
+            <div class="card-actions">
+              <button class="act-btn like" id="btn-upvote" onclick="feedback('upvote',this)">
+                <svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 8h3l2-5 4 9 2-4h2"/></svg>
+                Relevant
+              </button>
+              <button class="act-btn dislike" onclick="feedback('downvote',this);nextCard()">
+                <svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.6"><line x1="3" y1="3" x2="12" y2="12"/><line x1="12" y1="3" x2="3" y2="12"/></svg>
+                Skip
+              </button>
+              <div class="spacer"></div>
+              <button class="act-btn save-btn" id="btn-save" onclick="toggleSave()">
+                <svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.6" id="save-ico"><path d="M3 2h9a1 1 0 011 1v10l-5-3-5 3V3a1 1 0 011-1z"/></svg>
+                <span id="save-lbl">Save</span>
+              </button>
+              <a class="act-btn" id="btn-read" href="#" target="_blank" rel="noopener">
+                <svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 2H3a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1v-3"/><polyline points="9 2 13 2 13 6"/><line x1="13" y1="2" x2="7" y2="8"/></svg>
+                Read more
+              </a>
+            </div>
+          </div>
+        </div>
+        <!-- Done state -->
+        <div class="done-state" id="fc-done">
+          <div class="done-emoji">✨</div>
+          <div class="done-title">All caught up!</div>
+          <div class="done-sub" id="done-sub"></div>
+          <button class="btn btn-primary" style="margin-top:8px" onclick="resetCards()">Read again</button>
+        </div>
+      </div>
+      <!-- Nav buttons -->
+      <div class="card-nav" id="fc-nav" style="display:none">
+        <button class="nav-btn" onclick="prevCard()">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><polyline points="10 4 6 8 10 12"/></svg>
+          Back
+        </button>
+        <button class="nav-btn next" onclick="nextCard()">
+          Next
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><polyline points="6 4 10 8 6 12"/></svg>
+        </button>
+      </div>
+      <div class="kb-hint" id="fc-kb" style="display:none">
+        <span class="kbd">←</span> Back <span style="margin:0 4px">·</span>
+        <span class="kbd">→</span> Next <span style="margin:0 4px">·</span>
+        <span class="kbd">S</span> Save
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ FEED PAGE ═══ -->
+  <div class="page" id="page-feed">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Your Feed</div>
+        <div class="topbar-subtitle" id="feed-sub">Loading…</div>
+      </div>
+      <div class="topbar-actions">
+        <input id="feed-search" type="text" placeholder="Search…" oninput="applyFeedFilter()"
+          style="padding:8px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-card);color:var(--text-primary);font-size:13px;outline:none;width:180px">
+      </div>
+    </div>
+    <div class="feed-view">
+      <div class="feed-main">
+        <div class="filters">
+          <button class="fchip active" onclick="setFilter(this,'')">All</button>
+          <button class="fchip" onclick="setFilter(this,'ai')">🤖 AI</button>
+          <button class="fchip" onclick="setFilter(this,'finance')">💰 Finance</button>
+          <button class="fchip" onclick="setFilter(this,'technology')">💻 Tech</button>
+          <button class="fchip" onclick="setFilter(this,'science')">🔬 Science</button>
+          <button class="fchip" onclick="setFilter(this,'world')">🌍 World</button>
+        </div>
+        <div class="feed-list" id="feed-list">
+          <div class="sk" style="height:110px;border-radius:14px"></div>
+          <div class="sk" style="height:110px;border-radius:14px;margin-top:12px"></div>
+          <div class="sk" style="height:110px;border-radius:14px;margin-top:12px"></div>
+        </div>
+      </div>
+      <div class="feed-sidebar">
+        <div class="sw">
+          <div class="sw-title">Topics today</div>
+          <div class="topic-bar" id="topic-bar"><div class="sk" style="height:80px;border-radius:6px"></div></div>
+        </div>
+        <div class="sw">
+          <div class="sw-title">Quick stats</div>
+          <div id="quick-stats" style="font-size:13px;color:var(--text-secondary);line-height:1.9">Loading…</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SAVED PAGE ═══ -->
+  <div class="page" id="page-saved">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Library</div>
+        <div class="topbar-subtitle" id="saved-sub">0 saved articles</div>
+      </div>
+    </div>
+    <div class="saved-view">
+      <div class="search-bar">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-tertiary)" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><line x1="10.5" y1="10.5" x2="14" y2="14"/></svg>
+        <input type="text" placeholder="Search saved articles…" oninput="filterSaved(this.value)">
+      </div>
+      <div class="sec-title">Saved articles</div>
+      <div id="saved-list">
+        <div class="empty"><div class="empty-icon">🔖</div><h3>Nothing saved yet</h3><p>Hit Save on any flashcard to build your library.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PROFILE PAGE ═══ -->
+  <div class="page" id="page-profile">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Profile</div>
+        <div class="topbar-subtitle">Personalization settings</div>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-primary" id="save-prof-btn" onclick="saveProfile()">Save changes</button>
+      </div>
+    </div>
+    <div class="profile-view">
+      <div class="profile-grid">
+        <div class="pc">
+          <div class="pc-title">Basic info</div>
+          <div class="fg"><label class="fl">Your name</label><input class="fi" id="p-name" placeholder="e.g. Alex Kim"></div>
+          <div class="fg"><label class="fl">Job role</label><input class="fi" id="p-role" placeholder="e.g. Product Manager"></div>
+          <div class="fg">
+            <label class="fl">Industry</label>
+            <select class="fi" id="p-industry">
+              <option>Fintech</option><option>Healthcare</option><option>SaaS</option>
+              <option>E-commerce</option><option>Consulting</option><option>Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="pc">
+          <div class="pc-title">AI Preferences</div>
+          <div class="tog-row">
+            <div class="tog-info"><div class="tog-label">Deep analysis</div><div class="tog-desc">Longer summaries with context</div></div>
+            <div class="tog" id="t-deep" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="tog-row">
+            <div class="tog-info"><div class="tog-label">Industry filter</div><div class="tog-desc">Boost stories for your sector</div></div>
+            <div class="tog on" id="t-industry" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div style="margin-top:16px">
+            <label class="fl">Risk appetite</label>
+            <div class="sl-wrap">
+              <div class="sl-lbl"><span>Conservative</span><span>Aggressive</span></div>
+              <input type="range" class="sl" id="p-risk" min="0" max="100" value="50">
+            </div>
+          </div>
+        </div>
+        <div class="pc full">
+          <div class="pc-title">Your interests</div>
+          <div class="chips" id="interest-chips">
+            <span class="chip on" onclick="this.classList.toggle('on')">Artificial Intelligence</span>
+            <span class="chip on" onclick="this.classList.toggle('on')">Product Strategy</span>
+            <span class="chip" onclick="this.classList.toggle('on')">Venture Capital</span>
+            <span class="chip" onclick="this.classList.toggle('on')">Financial Markets</span>
+            <span class="chip" onclick="this.classList.toggle('on')">Geopolitics</span>
+            <span class="chip" onclick="this.classList.toggle('on')">Climate Tech</span>
+            <span class="chip" onclick="this.classList.toggle('on')">Biotech</span>
+            <span class="chip" onclick="this.classList.toggle('on')">Startups</span>
+            <span class="chip" onclick="this.classList.toggle('on')">Regulation</span>
+            <span class="chip" onclick="this.classList.toggle('on')">Macroeconomics</span>
+            <span class="chip" onclick="this.classList.toggle('on')">Robotics</span>
+            <span class="chip" onclick="this.classList.toggle('on')">Cybersecurity</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<!-- Mobile nav -->
+<div class="mob-nav">
+  <div class="mob-items">
+    <div class="mob-item active" onclick="navMob('flashcard',this)">
+      <svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="4" width="18" height="14" rx="2.5"/><line x1="6" y1="9" x2="16" y2="9"/><line x1="6" y1="13" x2="12" y2="13"/></svg>Cards
+    </div>
+    <div class="mob-item" onclick="navMob('feed',this)">
+      <svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6"><line x1="3" y1="5" x2="19" y2="5"/><line x1="3" y1="11" x2="19" y2="11"/><line x1="3" y1="17" x2="13" y2="17"/></svg>Feed
+    </div>
+    <div class="mob-item" onclick="navMob('saved',this)">
+      <svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 3h14a1 1 0 011 1v16l-7.5-4-7.5 4V4a1 1 0 011-1z"/></svg>Saved
+    </div>
+    <div class="mob-item" onclick="navMob('profile',this)">
+      <svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="8" r="4"/><path d="M3 20a8 8 0 0116 0"/></svg>Profile
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// CONFIG — change BACKEND if your server runs on a different port
+// ═══════════════════════════════════════════════════════════
+const BACKEND = 'http://localhost:8000';
+const API_KEY = 'dev-secret-123';
+const H = { 'Content-Type':'application/json', 'X-API-Key': API_KEY };
+
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+let flashcards = [];
+let allArticles = [];
+let savedIds   = new Set();
+let curIdx     = 0;
+let activeFilter = '';
+let backendOk  = false;
+let profile    = JSON.parse(localStorage.getItem('pulse_profile') || '{}');
+
+// ═══════════════════════════════════════════════════════════
+// API
+// ═══════════════════════════════════════════════════════════
+async function api(path, opts={}) {
+  const r = await fetch(BACKEND+path, { ...opts, headers:{...H,...(opts.headers||{})} });
+  if (!r.ok) throw new Error(r.status+' '+r.statusText);
+  return r.json();
+}
+
+// ═══════════════════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════════════════
+async function boot() {
+  loadProfile();
+  await checkBackend();
+  if (backendOk) {
+    await Promise.all([ loadFlashcards(), loadFeed(), loadStats(), syncSaved() ]);
+  }
+}
+
+async function checkBackend() {
+  const banner = document.getElementById('banner');
+  const msg    = document.getElementById('banner-msg');
+  try {
+    const h = await api('/health');
+    backendOk = true;
+    if (h.articles_loaded === 0) {
+      banner.className = 'banner banner-warn';
+      msg.innerHTML = `⚠ Backend is online but <strong>no articles found</strong>. Run: <code>cd backend && python pipeline.py --no-extraction</code>`;
+    } else {
+      banner.className = 'banner banner-ok';
+      msg.textContent  = `✓ Backend connected · ${h.articles_loaded} articles loaded`;
+      setTimeout(()=>banner.classList.add('hidden'), 3500);
+    }
+  } catch(e) {
+    backendOk = false;
+    banner.className = 'banner banner-err';
+    msg.innerHTML = `✗ Backend offline at <strong>${BACKEND}</strong> &mdash; run: <code>cd backend && uvicorn main:app --reload --port 8000</code>`;
+  }
+}
+
+async function refreshAll() {
+  backendOk = false;
+  document.getElementById('fc-skeleton').style.display = '';
+  document.getElementById('fc-card').style.display     = 'none';
+  document.getElementById('fc-nav').style.display      = 'none';
+  document.getElementById('fc-kb').style.display       = 'none';
+  document.getElementById('fc-done').classList.remove('show');
+  await checkBackend();
+  if (backendOk) {
+    await Promise.all([ loadFlashcards(), loadFeed(), loadStats(), syncSaved() ]);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// FLASHCARDS
+// ═══════════════════════════════════════════════════════════
+async function loadFlashcards() {
+  try {
+    const data = await api('/api/v1/news?limit=10&flashcard=true');
+    flashcards = data.articles;
+    curIdx = 0;
+    const date = new Date().toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
+    document.getElementById('fc-sub').textContent = `${date} · ${flashcards.length} cards`;
+    document.getElementById('badge-fc').textContent = flashcards.length;
+    flashcards.length > 0 ? showCard(0) : showDone();
+  } catch(e) {
+    document.getElementById('fc-sub').textContent = 'Failed to load — is the backend running?';
+  }
+}
+
+function timeAgo(iso) {
+  if (!iso) return '';
+  const d = (Date.now() - new Date(iso)) / 1000;
+  if (d < 3600) return Math.floor(d/60)+'m ago';
+  if (d < 86400) return Math.floor(d/3600)+'h ago';
+  return Math.floor(d/86400)+'d ago';
+}
+
+const CAT_ICON = {ai:'🤖',finance:'💰',technology:'💻',science:'🔬',world:'🌍',general:'📰'};
+const CAT_LABEL = {ai:'AI',finance:'Finance',technology:'Tech',science:'Science',world:'World',general:'News'};
+
+function showCard(idx) {
+  const a = flashcards[idx];
+  if (!a) { showDone(); return; }
+
+  document.getElementById('fc-skeleton').style.display = 'none';
+  document.getElementById('fc-done').classList.remove('show');
+  document.getElementById('fc-card').style.display = '';
+  document.getElementById('fc-nav').style.display   = 'flex';
+  document.getElementById('fc-kb').style.display    = 'flex';
+
+  const cat = (a.category||'general').toLowerCase();
+  const tag = document.getElementById('c-cat');
+  tag.textContent = (CAT_ICON[cat]||'📰')+' '+(CAT_LABEL[cat]||a.category);
+  tag.className   = 'cat-tag t-'+cat;
+
+  document.getElementById('c-src').textContent   = a.source||'';
+  document.getElementById('c-time').textContent  = timeAgo(a.published_at);
+  document.getElementById('c-score').textContent = a.score?.toFixed(1)||'—';
+  document.getElementById('c-title').textContent = a.title||'';
+  document.getElementById('btn-read').href        = a.canonical_url||'#';
+
+  // Dots
+  const filled = Math.min(Math.round((a.score||0)/2.5), 5);
+  document.getElementById('c-dots').innerHTML =
+    Array.from({length:5},(_,i)=>`<div class="s-dot${i<filled?' on':''}"></div>`).join('');
+
+  // Bullets — split summary into sentences
+  const raw = a.summary||'';
+  const sents = raw.match(/[^.!?]+[.!?]+/g)||[raw];
+  document.getElementById('c-bullets').innerHTML =
+    sents.slice(0,5).map(s=>`<li class="bullet"><span class="b-dot"></span><span>${s.trim()}</span></li>`).join('');
+
+  // Matters — personalised
+  const role     = profile.role||'professional';
+  const industry = profile.industry||'your industry';
+  document.getElementById('c-matters').textContent =
+    `As a ${role} in ${industry}, monitor how this story develops — it may shape decisions in your sector in the coming weeks.`;
+
+  // Save state
+  const saved = savedIds.has(a.id);
+  document.getElementById('save-ico').setAttribute('fill', saved?'currentColor':'none');
+  document.getElementById('save-lbl').textContent = saved?'Saved':'Save';
+  document.getElementById('btn-save').classList.toggle('saved', saved);
+
+  // Animate
+  const card = document.getElementById('the-card');
+  card.style.transition = 'none';
+  card.style.opacity = 0;
+  card.style.transform = 'translateY(14px) scale(.98)';
+  requestAnimationFrame(()=>{
+    card.style.transition = 'opacity .25s ease, transform .3s cubic-bezier(.34,1.2,.64,1)';
+    card.style.opacity    = 1;
+    card.style.transform  = 'none';
+  });
+
+  // Progress
+  const pct = (idx/flashcards.length)*100;
+  document.getElementById('prog').style.width = pct+'%';
+  document.getElementById('prog-lbl').textContent = `${idx+1} of ${flashcards.length}`;
+}
+
+function nextCard() { curIdx<flashcards.length-1 ? showCard(++curIdx) : showDone(); }
+function prevCard() { if(curIdx>0) showCard(--curIdx); }
+
+function showDone() {
+  document.getElementById('fc-card').style.display  = 'none';
+  document.getElementById('fc-nav').style.display   = 'none';
+  document.getElementById('fc-kb').style.display    = 'none';
+  document.getElementById('fc-skeleton').style.display = 'none';
+  document.getElementById('fc-done').classList.add('show');
+  document.getElementById('done-sub').textContent =
+    `You've read all ${flashcards.length} top stories. Come back later for fresh articles.`;
+  document.getElementById('prog').style.width = '100%';
+  document.getElementById('prog-lbl').textContent = `${flashcards.length} of ${flashcards.length}`;
+}
+
+function resetCards() { curIdx=0; showCard(0); }
+
+async function feedback(action, btn) {
+  const a = flashcards[curIdx];
+  if (!a||!backendOk) return;
+  try {
+    await api(`/api/v1/articles/${a.id}/feedback`,{method:'POST',body:JSON.stringify({action})});
+    if(action==='upvote'){btn.style.color='var(--accent-green)';btn.style.background='var(--accent-green-light)';btn.style.borderColor='var(--accent-green)';}
+  } catch(e){}
+}
+
+async function toggleSave() {
+  const a = flashcards[curIdx];
+  if (!a) return;
+  const saving = !savedIds.has(a.id);
+  saving ? savedIds.add(a.id) : savedIds.delete(a.id);
+
+  document.getElementById('save-ico').setAttribute('fill', saving?'currentColor':'none');
+  document.getElementById('save-lbl').textContent = saving?'Saved':'Save';
+  document.getElementById('btn-save').classList.toggle('saved', saving);
+
+  const badge = document.getElementById('badge-saved');
+  badge.textContent = savedIds.size;
+  badge.style.display = savedIds.size>0?'':'none';
+
+  if (backendOk) {
+    try { await api(`/api/v1/articles/${a.id}/feedback`,{method:'POST',body:JSON.stringify({action:saving?'save':'unsave'})}); } catch(e){}
+  }
+}
+
+async function syncSaved() {
+  try {
+    const d = await api('/api/v1/saved');
+    d.articles.forEach(a=>savedIds.add(a.id));
+    const badge = document.getElementById('badge-saved');
+    badge.textContent = savedIds.size;
+    badge.style.display = savedIds.size>0?'':'none';
+  } catch(e){}
+}
+
+// ═══════════════════════════════════════════════════════════
+// FEED
+// ═══════════════════════════════════════════════════════════
+async function loadFeed() {
+  try {
+    const d = await api('/api/v1/news?limit=80');
+    allArticles = d.articles;
+    document.getElementById('feed-sub').textContent =
+      `${d.total} articles collected · ranked by importance`;
+    renderFeed(allArticles);
+  } catch(e) {
+    document.getElementById('feed-list').innerHTML =
+      `<div class="empty"><div class="empty-icon">⚠</div><h3>Could not load feed</h3><p>Is the backend running?</p></div>`;
+  }
+}
+
+function renderFeed(arts) {
+  const el = document.getElementById('feed-list');
+  if (!arts.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">📭</div><h3>No articles found</h3><p>Try a different filter or run the pipeline.</p></div>`;
+    return;
+  }
+  el.innerHTML = arts.map((a,i)=>{
+    const cat = (a.category||'general').toLowerCase();
+    const excerpt = a.summary||'';
+    return `
+    <div class="feed-card" onclick="window.open('${a.canonical_url||'#'}','_blank','')" style="animation-delay:${i*.04}s">
+      <div>
+        <div class="fc-rank">#${i+1}</div>
+        <div class="fc-title">${a.title||''}</div>
+        <div class="fc-excerpt">${excerpt}</div>
+        <div class="fc-footer">
+          <span class="cat-tag t-${cat}" style="font-size:11px;padding:3px 9px">${CAT_ICON[cat]||'📰'} ${CAT_LABEL[cat]||a.category}</span>
+          <span style="font-size:12px;color:var(--text-tertiary)">${a.source||''}</span>
+          <span class="dot-sep">·</span>
+          <span style="font-size:12px;color:var(--text-tertiary)">${timeAgo(a.published_at)}</span>
+        </div>
+      </div>
+      <div class="fc-score">
+        <div class="sc-num">${(a.score||0).toFixed(1)}</div>
+        <div class="sc-track"><div class="sc-fill" style="width:${(a.score||0)*10}%"></div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function setFilter(el, cat) {
+  document.querySelectorAll('.fchip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  activeFilter = cat;
+  applyFeedFilter();
+}
+
+function applyFeedFilter() {
+  const q = (document.getElementById('feed-search')?.value||'').toLowerCase();
+  let arts = allArticles;
+  if (activeFilter) arts = arts.filter(a=>(a.category||'').toLowerCase()===activeFilter);
+  if (q) arts = arts.filter(a=>(a.title||'').toLowerCase().includes(q)||(a.summary||'').toLowerCase().includes(q));
+  renderFeed(arts);
+}
+
+// ═══════════════════════════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════════════════════════
+async function loadStats() {
+  try {
+    const s = await api('/api/v1/stats');
+    const cats = s.by_category;
+    const maxC = Math.max(...Object.values(cats),1);
+    const icons = {ai:'🤖',finance:'💰',technology:'💻',science:'🔬',world:'🌍'};
+    document.getElementById('topic-bar').innerHTML =
+      Object.entries(cats).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([c,n])=>
+        `<div class="t-row">
+          <span class="t-lbl">${icons[c]||'📰'} ${c}</span>
+          <div class="t-track"><div class="t-fill" style="width:${n/maxC*100}%"></div></div>
+          <span class="t-count">${n}</span>
+        </div>`
+      ).join('');
+    document.getElementById('quick-stats').innerHTML =
+      `<div>📰 <strong>${s.total_articles}</strong> articles</div>
+       <div>🔖 <strong>${s.saved_count}</strong> saved</div>
+       <div>🕐 Updated just now</div>`;
+  } catch(e){}
+}
+
+// ═══════════════════════════════════════════════════════════
+// SAVED PAGE
+// ═══════════════════════════════════════════════════════════
+function renderSaved(filter='') {
+  const q = filter.toLowerCase();
+  const arts = allArticles.filter(a=>savedIds.has(a.id)&&(!q||(a.title||'').toLowerCase().includes(q)));
+  document.getElementById('saved-sub').textContent = `${savedIds.size} saved article${savedIds.size!==1?'s':''}`;
+  const el = document.getElementById('saved-list');
+  if (!arts.length) {
+    el.innerHTML = savedIds.size===0
+      ? `<div class="empty"><div class="empty-icon">🔖</div><h3>Nothing saved yet</h3><p>Hit Save on any flashcard to build your library.</p></div>`
+      : `<div class="empty"><div class="empty-icon">🔍</div><h3>No results</h3></div>`;
+    return;
+  }
+  const cat = c=>(c||'general').toLowerCase();
+  el.innerHTML = arts.map(a=>`
+    <div class="saved-item" onclick="window.open('${a.canonical_url||'#'}','_blank','')">
+      <div class="si-body">
+        <div class="si-title">${a.title||''}</div>
+        <div class="si-meta">
+          <span class="cat-tag t-${cat(a.category)}" style="font-size:10px;padding:2px 8px">${CAT_ICON[cat(a.category)]||'📰'} ${CAT_LABEL[cat(a.category)]||a.category}</span>
+          <span>${a.source||''}</span><span class="dot-sep">·</span><span>${timeAgo(a.published_at)}</span>
+        </div>
+      </div>
+      <button class="act-btn save-btn saved" onclick="event.stopPropagation();unsave('${a.id}')">
+        <svg viewBox="0 0 15 15" fill="currentColor" stroke="currentColor" stroke-width="1.6"><path d="M3 2h9a1 1 0 011 1v10l-5-3-5 3V3a1 1 0 011-1z"/></svg>
+      </button>
+    </div>`).join('');
+}
+
+async function unsave(id) {
+  savedIds.delete(id);
+  if (backendOk) { try { await api(`/api/v1/articles/${id}/feedback`,{method:'POST',body:JSON.stringify({action:'unsave'})}); }catch(e){} }
+  const b = document.getElementById('badge-saved');
+  b.textContent = savedIds.size; b.style.display = savedIds.size>0?'':'none';
+  renderSaved();
+}
+
+function filterSaved(v) { renderSaved(v); }
+
+// ═══════════════════════════════════════════════════════════
+// PROFILE
+// ═══════════════════════════════════════════════════════════
+function loadProfile() {
+  if (profile.name) {
+    document.getElementById('p-name').value = profile.name;
+    document.getElementById('p-role').value = profile.role||'';
+    document.getElementById('u-name').textContent = profile.name;
+    document.getElementById('u-sub').textContent  = [profile.role,profile.industry].filter(Boolean).join(' · ');
+    document.getElementById('u-avatar').textContent = profile.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  }
+}
+
+function saveProfile() {
+  profile.name     = document.getElementById('p-name').value;
+  profile.role     = document.getElementById('p-role').value;
+  profile.industry = document.getElementById('p-industry').value;
+  profile.interests= [...document.querySelectorAll('.chip.on')].map(el=>el.textContent);
+  localStorage.setItem('pulse_profile', JSON.stringify(profile));
+  loadProfile();
+  const btn = document.getElementById('save-prof-btn');
+  btn.textContent = '✓ Saved!';
+  setTimeout(()=>btn.textContent='Save changes', 2000);
+}
+
+// ═══════════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════════
+function nav(name) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelector(`.nav-item[data-page="${name}"]`)?.classList.add('active');
+  if (name==='saved') renderSaved();
+}
+
+function navMob(name, el) {
+  nav(name);
+  document.querySelectorAll('.mob-item').forEach(n=>n.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// Sidebar nav clicks
+document.querySelectorAll('.nav-item[data-page]').forEach(el=>{
+  el.addEventListener('click', ()=>nav(el.dataset.page));
+});
+
+// ═══════════════════════════════════════════════════════════
+// THEME
+// ═══════════════════════════════════════════════════════════
+function toggleTheme() {
+  const dark = document.documentElement.getAttribute('data-theme')==='dark';
+  document.documentElement.setAttribute('data-theme', dark?'light':'dark');
+  document.getElementById('theme-lbl').textContent = dark?'Light mode':'Dark mode';
+}
+
+// ═══════════════════════════════════════════════════════════
+// KEYBOARD + SWIPE
+// ═══════════════════════════════════════════════════════════
+document.addEventListener('keydown', e=>{
+  if (!document.getElementById('page-flashcard').classList.contains('active')) return;
+  if (e.target.tagName==='INPUT') return;
+  if (e.key==='ArrowRight'||e.key==='l') nextCard();
+  if (e.key==='ArrowLeft' ||e.key==='h') prevCard();
+  if (e.key==='s'||e.key==='S') toggleSave();
+});
+
+let tx=0;
+document.addEventListener('touchstart', e=>{tx=e.touches[0].clientX;});
+document.addEventListener('touchend',   e=>{
+  if (!document.getElementById('page-flashcard').classList.contains('active')) return;
+  const dx=e.changedTouches[0].clientX-tx;
+  if (dx<-60) nextCard();
+  if (dx>60)  prevCard();
+});
+
+// ═══════════════════════════════════════════════════════════
+// GO
+// ═══════════════════════════════════════════════════════════
+boot();
+</script>
+</body>
+</html>
