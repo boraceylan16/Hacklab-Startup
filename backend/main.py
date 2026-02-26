@@ -16,20 +16,20 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s") #logging configuration
 log = logging.getLogger("pulse")
 
 # ── Config ────────────────────────────────────────────────────────────────────
-DEV_API_KEY       = os.getenv("DEV_API_KEY", "dev-secret-123")
-ENABLE_SUMMARIZER = os.getenv("ENABLE_SUMMARIZER", "false").lower() == "true"
-ARTICLES_PATH     = os.getenv("ARTICLES_PATH", str(Path(__file__).parent / "output" / "articles_latest.json"))
-RATE_LIMIT_RPM    = int(os.getenv("RATE_LIMIT_RPM", "120"))
+DEV_API_KEY       = os.getenv("DEV_API_KEY", "dev-secret-123") #Looks for an environment, if it can't find, then 
+ENABLE_SUMMARIZER = os.getenv("ENABLE_SUMMARIZER", "false").lower() == "true" 
+ARTICLES_PATH     = os.getenv("ARTICLES_PATH", str(Path(__file__).parent / "output" / "articles_latest.json")) #output path
+RATE_LIMIT_RPM    = int(os.getenv("RATE_LIMIT_RPM", "120")) #requests per minute
 
-app = FastAPI(title="Pulse API", version="1.0")
+app = FastAPI(title="Pulse API", version="1.0") #creating the API server
 
-app.add_middleware(
+app.add_middleware( #controlling which websites can access our API
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"], #all websites can call our API
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -38,7 +38,7 @@ app.add_middleware(
 # ── Rate limiter ──────────────────────────────────────────────────────────────
 _buckets: dict[str, list[float]] = defaultdict(list)
 
-def _rate_check(ip: str):
+def _rate_check(ip: str): #checking the rate amount
     now = time.time()
     hits = [t for t in _buckets[ip] if now - t < 60]
     if len(hits) >= RATE_LIMIT_RPM:
@@ -46,23 +46,23 @@ def _rate_check(ip: str):
     hits.append(now)
     _buckets[ip] = hits
 
-def auth(request: Request):
+def auth(request: Request): #authentication
     _rate_check(request.client.host)
     key = request.headers.get("X-API-Key") or request.query_params.get("api_key")
     if key != DEV_API_KEY:
         raise HTTPException(401, "Invalid API key")
 
 # ── Article loading ───────────────────────────────────────────────────────────
-def load_articles() -> list[dict]:
+def load_articles() -> list[dict]: #loading the article
     try:
         with open(ARTICLES_PATH, encoding="utf-8") as f:
-            data = json.load(f)
-        articles = data.get("articles", [])
+            data = json.load(f) #loading from the json format
+        articles = data.get("articles", []) #get "articles" else empty list
 
         # Score: blend word_count + recency
         now = datetime.utcnow()
         for a in articles:
-            wc = a.get("word_count", 0)
+            wc = a.get("word_count", 0) #getting the word count, else 0
             try:
                 pub = datetime.fromisoformat(a["published_at"].replace("Z","")) if a.get("published_at") else None
                 age_hours = max((now - pub).total_seconds() / 3600, 0.1) if pub else 24
@@ -88,7 +88,7 @@ def load_articles() -> list[dict]:
 
 # ── Extractive summarizer (no AI needed) ─────────────────────────────────────
 def get_summary(text: str) -> dict:
-    if ENABLE_SUMMARIZER and text:
+    if ENABLE_SUMMARIZER and text: #if summarizer is enabled and text exists
         try:
             from core.ai_summarizer_draft1 import summarize
             return summarize(text)
@@ -121,12 +121,12 @@ def health():
         "status": "ok",
         "articles_loaded": len(articles),
         "articles_path": ARTICLES_PATH,
-        "summarizer": ENABLE_SUMMARIZER,
+        "summarizer": ENABLE_SUMMARIZER, 
         "ts": datetime.utcnow().isoformat(),
     }
 
 
-@app.get("/api/v1/news")
+@app.get("/api/v1/news") #Return a paginated list of articles, with optional filtering.
 def get_news(
     limit:     int  = Query(20, le=100),
     page:      int  = Query(1, ge=1),
@@ -165,7 +165,7 @@ def get_news(
     }
 
 
-@app.get("/api/v1/articles/{article_id}")
+@app.get("/api/v1/articles/{article_id}") #Return the full article data and a generated summary for one article.
 def get_article(article_id: str, _: None = Depends(auth)):
     article = next((a for a in load_articles() if a.get("id") == article_id), None)
     if not article:
@@ -185,7 +185,7 @@ def get_article(article_id: str, _: None = Depends(auth)):
     }
 
 
-@app.post("/api/v1/articles/{article_id}/feedback")
+@app.post("/api/v1/articles/{article_id}/feedback") # Receive user actions/feedback about an article (save/unsave, upvote/downvote, skip).
 def post_feedback(article_id: str, body: FeedbackBody, _: None = Depends(auth)):
     valid = {"save", "unsave", "upvote", "downvote", "skip"}
     if body.action not in valid:
@@ -198,14 +198,14 @@ def post_feedback(article_id: str, body: FeedbackBody, _: None = Depends(auth)):
     return {"ok": True, "saved": article_id in _saved}
 
 
-@app.get("/api/v1/saved")
+@app.get("/api/v1/saved") #Return all articles that the user has saved.
 def get_saved(_: None = Depends(auth)):
     articles = load_articles()
     saved_arts = [a for a in articles if a.get("id") in _saved]
     return {"articles": saved_arts, "total": len(saved_arts)}
 
 
-@app.get("/api/v1/stats")
+@app.get("/api/v1/stats") #Return simple statistics about the current article collection.
 def get_stats(_: None = Depends(auth)):
     articles = load_articles()
     from collections import Counter
@@ -218,7 +218,7 @@ def get_stats(_: None = Depends(auth)):
     }
 
 
-@app.get("/api/v1/flashcards/stream")
+@app.get("/api/v1/flashcards/stream") #
 async def flashcard_stream(
     request: Request,
     last_event_id: Optional[str] = Query(None, alias="lastEventId"),

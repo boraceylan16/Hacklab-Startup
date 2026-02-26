@@ -17,7 +17,7 @@ echo ""
 
 # 1. Install Python deps
 echo "▶ Checking Python dependencies…"
-pip install -q fastapi "uvicorn[standard]" pydantic feedparser requests \
+pip3 install -q fastapi "uvicorn[standard]" pydantic feedparser requests \
     newspaper3k readability-lxml beautifulsoup4 lxml python-multipart 2>/dev/null || true
 echo "  ✓ Dependencies ready"
 

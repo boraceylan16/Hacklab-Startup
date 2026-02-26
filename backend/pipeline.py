@@ -36,19 +36,19 @@ def run_pipeline(
     output_dir: str = OUTPUT_DIR,
 ) -> CollectionResult:
     feeds = feeds or RSS_FEEDS
-    result = CollectionResult(run_started_at=datetime.utcnow())
+    result = CollectionResult(run_started_at=datetime.utcnow()) #initializing the object
 
-    logger.info("=" * 60)
-    logger.info("PHASE 1-A  RSS Collection")
-    logger.info(f"  Feeds: {len(feeds)}  |  Max per feed: {max_per_feed}")
-    logger.info("=" * 60)
+    logger.info("=" * 60) #logging 
+    logger.info("PHASE 1-A  RSS Collection") #logging 
+    logger.info(f"  Feeds: {len(feeds)}  |  Max per feed: {max_per_feed}") #logging
+    logger.info("=" * 60) #logging
 
-    collector = RSSCollector(timeout=timeout, max_per_feed=max_per_feed, user_agent=USER_AGENT)
-    articles, rss_stats = collector.collect(feeds)
+    collector = RSSCollector(timeout=timeout, max_per_feed=max_per_feed, user_agent=USER_AGENT) #
+    articles, rss_stats = collector.collect(feeds) #collecting the rss stats and articles 
 
-    result.feeds_attempted = rss_stats["attempted"]
-    result.feeds_succeeded = rss_stats["succeeded"]
-    result.feeds_failed    = rss_stats["failed"]
+    result.feeds_attempted = rss_stats["attempted"] #updating the attribute
+    result.feeds_succeeded = rss_stats["succeeded"] #updating the attribute
+    result.feeds_failed    = rss_stats["failed"] #updating the attribute
 
     logger.info(f"\n[RSS DONE] {rss_stats['succeeded']}/{rss_stats['attempted']} feeds → {len(articles)} raw articles\n")
 
@@ -56,9 +56,9 @@ def run_pipeline(
     logger.info("PHASE 1-B  Deduplication")
     logger.info("=" * 60)
 
-    deduplicator = Deduplicator(title_similarity_threshold=0.75)
-    articles, dupes_removed = deduplicator.deduplicate(articles)
-    result.duplicates_removed = dupes_removed
+    deduplicator = Deduplicator(title_similarity_threshold=0.75) #initializing the object
+    articles, dupes_removed = deduplicator.deduplicate(articles) #getting the articles and removed duplicates
+    result.duplicates_removed = dupes_removed #updating the attribute
 
     logger.info(f"[DEDUP DONE] Removed {dupes_removed} duplicates → {len(articles)} unique articles\n")
 
@@ -66,24 +66,24 @@ def run_pipeline(
         logger.info("=" * 60)
         logger.info("PHASE 1-C  Full Text Extraction")
         logger.info("=" * 60)
-        extractor = TextExtractor(timeout=timeout)
-        articles = extractor.extract_batch(articles)
-        failures = sum(1 for a in articles if not a.extraction_success)
-        result.extraction_failures = failures
-        logger.info(f"\n[EXTRACT DONE] {len(articles) - failures}/{len(articles)} successful\n")
+        extractor = TextExtractor(timeout=timeout) #extracting the text and waiting the webpage to answer for "timeout"
+        articles = extractor.extract_batch(articles) #extracting the article batch
+        failures = sum(1 for a in articles if not a.extraction_success) #calculating the failed extractions
+        result.extraction_failures = failures #updating the attribute
+        logger.info(f"\n[EXTRACT DONE] {len(articles) - failures}/{len(articles)} successful\n") #logging
     else:
-        logger.info("[EXTRACT SKIPPED] --no-extraction flag set")
+        logger.info("[EXTRACT SKIPPED] --no-extraction flag set") #logging
 
-    result.articles = articles
-    result.run_ended_at = datetime.utcnow()
+    result.articles = articles #updating the attribute
+    result.run_ended_at = datetime.utcnow() #end time
 
-    _save_output(result, output_dir)
-    _print_summary(result)
+    _save_output(result, output_dir) #saving the output in a directory
+    _print_summary(result) #printing the summary
 
     return result
 
 
-def _save_output(result: CollectionResult, output_dir: str) -> None:
+def _save_output(result: CollectionResult, output_dir: str) -> None: #saving the output (trivial)
     Path(output_dir).mkdir(parents=True, exist_ok=True)
     ts = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
 
@@ -101,7 +101,7 @@ def _save_output(result: CollectionResult, output_dir: str) -> None:
     logger.info(f"[SAVED] {latest_path}")
 
 
-def _print_summary(result: CollectionResult) -> None:
+def _print_summary(result: CollectionResult) -> None: #summary (trivial)
     s = result.summary_dict()
     duration = (result.run_ended_at - result.run_started_at).seconds if result.run_ended_at else 0
     logger.info("\n" + "=" * 60)

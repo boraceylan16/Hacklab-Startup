@@ -14,8 +14,9 @@ from core.models import RawArticle
 
 logger = logging.getLogger(__name__)
 
+#TRYING TO IMPORT THE LIBRARIES
 try:
-    from newspaper import Article as NewspaperArticle
+    from newspaper import Article as NewspaperArticle 
     NEWSPAPER_AVAILABLE = True
 except ImportError:
     NEWSPAPER_AVAILABLE = False
@@ -33,58 +34,58 @@ except ImportError:
     BS4_AVAILABLE = False
 
 MIN_WORD_COUNT = 80
-CONTENT_TAGS   = ["article", "main", "section"]
-CONTENT_CLASSES = ["article", "post", "content", "story", "entry", "body"]
+CONTENT_TAGS   = ["article", "main", "section"]  #for scraping (tags) <article>...</article>
+CONTENT_CLASSES = ["article", "post", "content", "story", "entry", "body"] #for scraping (classes) <div class="article-body">
 BOILERPLATE_PATTERNS = [
     r"subscribe to.*newsletter",
     r"sign up for.*alerts",
     r"advertisement",
     r"cookies policy",
     r"follow us on",
-]
-_BOILERPLATE_RE = re.compile("|".join(BOILERPLATE_PATTERNS), re.IGNORECASE)
+] #unwanted content
+_BOILERPLATE_RE = re.compile("|".join(BOILERPLATE_PATTERNS), re.IGNORECASE) #matching regular expressions (case-insensitive)
 
 DEFAULT_HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
         "AppleWebKit/537.36 (KHTML, like Gecko) "
         "Chrome/120.0.0.0 Safari/537.36"
-    ),
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-    "Accept-Language": "en-US,en;q=0.5",
-}
+    ), #browser / device
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8", #content types we accept
+    "Accept-Language":"en-US,en;q=0.5", #language we accept
+} #http request headers, this is important in order to show the requester is not a bot
 
 
-class TextExtractor:
+class TextExtractor: #initializing the class
     def __init__(
         self,
-        timeout: int = 15,
-        delay_between_requests: float = 0.3,
-        min_word_count: int = MIN_WORD_COUNT,
+        timeout: int = 15, #the max time the requester waits until a webpage answers
+        delay_between_requests: float = 0.3, #amount of delay between the requests
+        min_word_count: int = MIN_WORD_COUNT, #min word count we accept
     ):
         self.timeout = timeout
         self.delay = delay_between_requests
         self.min_words = min_word_count
 
-    def extract_batch(self, articles: list[RawArticle], show_progress: bool = True) -> list[RawArticle]:
-        total = len(articles)
-        for i, article in enumerate(articles, 1):
-            self._extract_one(article)
-            if show_progress:
-                status = "✓" if article.extraction_success else "✗"
+    def extract_batch(self, articles: list[RawArticle], show_progress: bool = True) -> list[RawArticle]: #extracting the batch
+        total = len(articles) #number of articles
+        for i, article in enumerate(articles, 1): #enumerating over articles
+            self._extract_one(article) #extract one article
+            if show_progress: #If show progress is True
+                status = "✓" if article.extraction_success else "✗" #if extraction is successful return "✓"
                 logger.info(
-                    f"[EXTRACT {i:3}/{total}] {status} "
-                    f"({article.extraction_method:12s}) "
-                    f"{article.word_count:5d}w  {article.title[:55]}"
+                    f"[EXTRACT {i:3}/{total}] {status} " #showing how many articles are extracted
+                    f"({article.extraction_method:12s}) " 
+                    f"{article.word_count:5d}w  {article.title[:55]}" #number of words in the article
                 )
             time.sleep(self.delay)
         return articles
 
     def extract_one(self, article: RawArticle) -> RawArticle:
-        self._extract_one(article)
+        self._extract_one(article) 
         return article
 
-    def _extract_one(self, article: RawArticle) -> None:
+    def _extract_one(self, article: RawArticle) -> None: #trying method in a hierarchically way
         methods = [
             ("newspaper3k",  self._try_newspaper),
             ("readability",  self._try_readability),
@@ -98,7 +99,7 @@ class TextExtractor:
             try:
                 if method_name in ("readability", "bs4"):
                     if html is None:
-                        html = self._fetch_html(article.canonical_url)
+                        html = self._fetch_html(article.canonical_url) #getting the html
                     if not html:
                         continue
                     text, image = method_fn(html, article.canonical_url)
@@ -107,10 +108,10 @@ class TextExtractor:
                 else:
                     text, image = method_fn(article)
 
-                text = self._clean_text(text)
-                wc = len(text.split())
+                text = self._clean_text(text) #cleaning the text
+                wc = len(text.split()) #word count
 
-                if wc >= self.min_words:
+                if wc >= self.min_words: #condition for the min word
                     article.full_text = text
                     article.word_count = wc
                     article.extraction_method = method_name
@@ -127,7 +128,7 @@ class TextExtractor:
         article.extraction_method = "failed"
         article.extraction_error = "All extraction methods exhausted"
 
-    def _try_newspaper(self, url: str) -> tuple[str, str]:
+    def _try_newspaper(self, url: str) -> tuple[str, str]: #trying to extract with newspaper
         if not NEWSPAPER_AVAILABLE:
             raise ImportError("newspaper3k not installed")
         art = NewspaperArticle(url, request_timeout=self.timeout)
@@ -135,7 +136,7 @@ class TextExtractor:
         art.parse()
         return art.text, art.top_image or ""
 
-    def _try_readability(self, html: str, url: str) -> tuple[str, str]:
+    def _try_readability(self, html: str, url: str) -> tuple[str, str]: #trying to extract with readability
         if not READABILITY_AVAILABLE:
             raise ImportError("readability-lxml not installed")
         doc = ReadabilityDoc(html, url=url)
@@ -147,7 +148,7 @@ class TextExtractor:
             text = re.sub(r"<[^>]+>", " ", content_html)
         return text, ""
 
-    def _try_beautifulsoup(self, html: str, url: str) -> tuple[str, str]:
+    def _try_beautifulsoup(self, html: str, url: str) -> tuple[str, str]: #try to scrape with bs4
         if not BS4_AVAILABLE:
             raise ImportError("beautifulsoup4 not installed")
         soup = BeautifulSoup(html, "html.parser")
@@ -179,12 +180,12 @@ class TextExtractor:
 
         return text, img
 
-    def _try_rss_fallback(self, article: RawArticle) -> tuple[str, str]:
+    def _try_rss_fallback(self, article: RawArticle) -> tuple[str, str]: #fallback (plan D)
         if article.summary and len(article.summary.split()) >= self.min_words:
             return article.summary, article.top_image
         raise ValueError("RSS summary too short")
 
-    def _fetch_html(self, url: str) -> Optional[str]:
+    def _fetch_html(self, url: str) -> Optional[str]: #fetching the html for readability and bs4
         try:
             resp = requests.get(url, headers=DEFAULT_HEADERS, timeout=self.timeout, allow_redirects=True)
             resp.raise_for_status()
@@ -193,7 +194,7 @@ class TextExtractor:
             logger.debug(f"[fetch_html] {url}: {exc}")
             return None
 
-    def _clean_text(self, text: str) -> str:
+    def _clean_text(self, text: str) -> str: #cleaning the text after text extraction
         lines = text.splitlines()
         cleaned = []
         for line in lines:
@@ -204,3 +205,6 @@ class TextExtractor:
                 continue
             cleaned.append(line)
         return "\n".join(cleaned)
+
+
+#DONE
